@@ -32,4 +32,15 @@ example: ∀ m n : Nat, n + m = m + n := by
     rw[hd]
 
 
-#print Nat.mul_comm
+-- Version 1: Using tactic mode
+example (p q : Prop) : p ∧ q → q ∧ p := by
+  intro h
+  cases h with
+  | intro hp hq =>
+    constructor
+    · exact hq
+    · exact hp
+
+-- Version 2: Using term mode (pattern matching)
+example (p q : Prop) : p ∧ q → q ∧ p :=
+  fun ⟨hp, hq⟩ => ⟨hq, hp⟩

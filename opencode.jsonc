@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "lean_explore": {
+      "type": "local",
+      "enabled": true,
+      "command": [
+        "lean-explore",
+        "mcp",
+        "serve"
+      ]
+    },
+    "lean_explore_local": {
+      "type": "local",
+      "enabled": false,
+      "command": [
+        "lean-explore",
+        "mcp",
+        "serve",
+        "--backend",
+        "local"
+      ]
+    }
+  }
+}

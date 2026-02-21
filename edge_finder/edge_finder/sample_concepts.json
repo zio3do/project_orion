@@ -1,0 +1,33 @@
+{
+  "theme": "finite sums",
+  "primitives": [
+    "Finset",
+    "Fintype",
+    "BigOperators",
+    "sum",
+    "range"
+  ],
+  "operators": [
+    "Finset.sum",
+    "Finset.card",
+    "Finset.map"
+  ],
+  "identity_families": [
+    "sum_range_succ",
+    "sum_add_distrib",
+    "sum_mul",
+    "sum_sigma"
+  ],
+  "candidate_namespaces": [
+    "Finset",
+    "Finset.sum",
+    "BigOperators"
+  ],
+  "search_queries": [
+    "finite sum",
+    "Finset sum",
+    "sum over finset",
+    "sum range",
+    "sum over finite type"
+  ]
+}

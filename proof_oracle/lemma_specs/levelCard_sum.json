@@ -1,0 +1,11 @@
+{
+  "lemma_name": "levelCard_sum",
+  "target_file": "Orion/OracleTests/LevelCardSum.lean",
+  "target_namespace": "Orion.OracleTests.LevelCardSum",
+  "informal_statement": "In a finite ℕ-graded poset, the sum of level cardinalities equals the total cardinality. Define levelCard as the number of elements at each grade level, then prove that summing levelCard over all grade values partitions the poset: ∑ k in Finset.image (grade ℕ) Finset.univ, (Finset.univ.filter (fun x => grade ℕ x = k)).card = Fintype.card α.",
+  "suggested_signature": "theorem levelCard_sum [Fintype α] [DecidableEq α] [Preorder α] [GradeOrder ℕ α] : ∑ k in Finset.univ.image (grade ℕ), (Finset.univ.filter (fun x : α => grade ℕ x = k)).card = Fintype.card α",
+  "depends_on": ["GradeOrder", "Fintype", "Finset.filter", "Finset.card", "grade"],
+  "hints": "This is a partition-of-unity argument. The key insight is that filtering Finset.univ by grade level and summing the cardinalities is the same as counting all elements. Look at Finset.sum_card_filter_eq or Finset.card_eq_sum_card_image for the partition lemma. The Mathlib file Mathlib.Data.Finset.Card or Mathlib.Data.Fintype.BigOperators may have the right tool. Also consider Finset.sum_filter_card_eq.",
+  "attempt_budget": 10,
+  "difficulty": "medium"
+}

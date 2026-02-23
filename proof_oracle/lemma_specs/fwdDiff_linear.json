@@ -1,0 +1,11 @@
+{
+  "lemma_name": "fwdDiff_linear",
+  "target_file": "Orion/Combinatorics/FiniteDifference.lean",
+  "target_namespace": "Orion.Combinatorics.FiniteDifference",
+  "informal_statement": "The forward difference operator is linear: Δ(af + bg) = aΔf + bΔg for integer-valued functions on ℕ",
+  "suggested_signature": "theorem fwdDiff_linear (a b : ℤ) (f g : ℕ → ℤ) (n : ℕ) : fwdDiff (fun i => a * f i + b * g i) n = a * fwdDiff f n + b * fwdDiff g n",
+  "depends_on": ["fwdDiff"],
+  "hints": "Unfold fwdDiff, then use ring to close the goal. Try: simp [fwdDiff]; ring",
+  "attempt_budget": 10,
+  "difficulty": "easy"
+}

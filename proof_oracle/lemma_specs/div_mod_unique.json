@@ -1,0 +1,11 @@
+{
+  "lemma_name": "div_mod_unique",
+  "target_file": "Orion/OracleTests/DivModUnique.lean",
+  "target_namespace": "Orion.OracleTests.DivModUnique",
+  "informal_statement": "Uniqueness of Euclidean division: if n = d*q + r with r < d and n = d*q' + r' with r' < d, then q = q' and r = r'",
+  "suggested_signature": "theorem div_mod_unique (n d q r q' r' : Nat) (hd : d > 0) (h1 : n = d*q + r) (hr : r < d) (h2 : n = d*q' + r') (hr' : r' < d) : q = q' ∧ r = r'",
+  "depends_on": [],
+  "hints": "",
+  "attempt_budget": 10,
+  "difficulty": "medium"
+}

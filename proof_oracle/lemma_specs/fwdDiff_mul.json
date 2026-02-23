@@ -1,0 +1,11 @@
+{
+  "lemma_name": "fwdDiff_mul",
+  "target_file": "Orion/OracleTests/FwdDiffMul.lean",
+  "target_namespace": "Orion.OracleTests.FwdDiffMul",
+  "informal_statement": "The discrete product rule for the forward difference operator: Δ(fg)(n) = f(n+1)·Δg(n) + g(n)·Δf(n)",
+  "suggested_signature": "theorem fwdDiff_mul (f g : ℕ → ℤ) (n : ℕ) : fwdDiff (fun i => f i * g i) n = f (n + 1) * fwdDiff g n + g n * fwdDiff f n",
+  "depends_on": ["fwdDiff"],
+  "hints": "",
+  "attempt_budget": 10,
+  "difficulty": "medium"
+}

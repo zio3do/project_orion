@@ -1,0 +1,11 @@
+{
+  "lemma_name": "saturatedChain_length",
+  "target_file": "Orion/OracleTests/SaturatedChainLength.lean",
+  "target_namespace": "Orion.OracleTests.SaturatedChainLength",
+  "informal_statement": "Define a saturated chain as a List where each consecutive pair satisfies CovBy (a ⋖ b). Then prove that in a ℕ-graded order (GradeMinOrder ℕ), if [a₀, a₁, ..., aₙ] is a saturated chain (each aᵢ ⋖ aᵢ₊₁), then grade ℕ aₙ = grade ℕ a₀ + n. Use List.Chain' CovBy as the saturated chain predicate on the list, and prove the grade-length relationship by induction on the list.",
+  "suggested_signature": "theorem saturatedChain_length [Preorder α] [GradeMinOrder ℕ α] (l : List α) (hl : l.Chain' (· ⋖ ·)) (hne : l ≠ []) : grade ℕ (l.getLast hne) = grade ℕ (l.head hne) + (l.length - 1)",
+  "depends_on": ["GradeMinOrder", "List.Chain'", "CovBy", "grade"],
+  "hints": "Use induction on l. The key lemma is CovBy.grade : a ⋖ b → grade ℕ a ⋖ grade ℕ b, which for ℕ means grade b = grade a + 1 (via Order.covBy_iff_add_one_eq or CovBy.eq_add_one or Nat.covBy_iff_succ_eq). For the inductive step, split the chain into head :: tail, use List.Chain'.tail and List.Chain'.rel_head to get the CovBy for the first pair. Be careful with List.getLast on head :: tail.",
+  "attempt_budget": 10,
+  "difficulty": "medium"
+}

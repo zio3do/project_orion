@@ -1,0 +1,11 @@
+{
+  "lemma_name": "rankGenPoly_eval_one",
+  "target_file": "Orion/OracleTests/RankGenPolyEvalOne.lean",
+  "target_namespace": "Orion.OracleTests.RankGenPolyEvalOne",
+  "informal_statement": "Define the rank generating polynomial of a finite ℕ-graded poset as rankGenPoly := ∑ k in (Finset.univ.image (grade ℕ)), (Finset.univ.filter (fun x => grade ℕ x = k)).card • (Polynomial.X ^ k). Then prove that evaluating this polynomial at 1 gives the total cardinality: Polynomial.eval 1 rankGenPoly = Fintype.card α. The proof should use Polynomial.eval_finset_sum and Polynomial.eval_smul plus the fact that summing level cardinalities gives total cardinality.",
+  "suggested_signature": "noncomputable def rankGenPoly (α : Type*) [Fintype α] [DecidableEq α] [Preorder α] [GradeOrder ℕ α] : Polynomial ℕ := ∑ k in (Finset.univ : Finset α).image (grade ℕ), (Finset.univ.filter (fun x : α => grade ℕ x = k)).card • (Polynomial.X ^ k)\n\ntheorem rankGenPoly_eval_one (α : Type*) [Fintype α] [DecidableEq α] [Preorder α] [GradeOrder ℕ α] : Polynomial.eval 1 (rankGenPoly α) = Fintype.card α",
+  "depends_on": ["GradeOrder", "Fintype", "Polynomial", "Finset.filter", "grade"],
+  "hints": "Define rankGenPoly first, then prove eval_one. Unfold rankGenPoly, use Polynomial.eval_finset_sum to push eval inside the sum, then use Polynomial.eval_smul and Polynomial.eval_pow plus Polynomial.eval_X to simplify each term to (filter card) * 1^k = filter card. Then the sum of filter cards equals Fintype.card α by Finset.card_eq_sum_card_image. Work over Polynomial ℕ (natural number coefficients) to avoid coercion issues.",
+  "attempt_budget": 10,
+  "difficulty": "hard"
+}

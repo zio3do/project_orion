@@ -1,0 +1,11 @@
+{
+  "lemma_name": "grade_bot_eq_zero",
+  "target_file": "Orion/OracleTests/GradeBotEqZero.lean",
+  "target_namespace": "Orion.OracleTests.GradeBotEqZero",
+  "informal_statement": "In a ℕ-graded order with a bottom element, the grade of ⊥ is 0. That is, if α has GradeMinOrder ℕ and OrderBot, then grade ℕ (⊥ : α) = 0.",
+  "suggested_signature": "theorem grade_bot_eq_zero [Preorder α] [OrderBot α] [GradeMinOrder ℕ α] : grade ℕ (⊥ : α) = 0",
+  "depends_on": ["GradeMinOrder", "OrderBot", "grade"],
+  "hints": "GradeMinOrder maps bot to the minimal grade. For ℕ the minimal element is 0. Look at grade_bot or GradeMinOrder.grade_bot if they exist, otherwise use grade_le_grade plus bot_le to show grade ⊥ ≤ grade x for all x, then use Nat.eq_zero_of_le_zero or similar. The key Mathlib file is Mathlib.Order.Grade.",
+  "attempt_budget": 10,
+  "difficulty": "easy"
+}

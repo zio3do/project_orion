@@ -1,0 +1,11 @@
+{
+  "lemma_name": "sum_range_id",
+  "target_file": "Orion/OracleTests/SumRangeId.lean",
+  "target_namespace": "Orion.OracleTests.SumRangeId",
+  "informal_statement": "The sum of the first n+1 natural numbers equals n*(n+1)/2: ∑ i in range(n+1), i = n*(n+1)/2",
+  "suggested_signature": "theorem sum_range_id (n : Nat) : (Finset.range (n+1)).sum id = n*(n+1)/2",
+  "depends_on": [],
+  "hints": "",
+  "attempt_budget": 10,
+  "difficulty": "medium"
+}

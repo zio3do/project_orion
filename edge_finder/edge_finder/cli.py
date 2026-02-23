@@ -24,6 +24,7 @@ from edge_finder.analysis.heuristics import classify_gaps
 from edge_finder.config import DEFAULT_OUTPUT_DIR, build_metadata
 from edge_finder.llm.concept_generator import generate_concepts
 from edge_finder.llm.concept_remapper import remap_concepts
+from edge_finder.llm.concept_rewriter import rewrite_concepts
 from edge_finder.llm.pocket_synthesis import synthesize_pocket
 from edge_finder.output.writer import write_run_report
 from edge_finder.search.leanexplore import (
@@ -114,7 +115,7 @@ def main() -> None:
 
     output_dir = Path(args.output_dir)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    theme_slug = args.theme.replace(" ", "_").lower()
+    theme_slug = args.theme.replace(" ", "_").lower()[:80]
     run_dir = output_dir / f"run_{timestamp}_{theme_slug}"
     run_dir.mkdir(parents=True, exist_ok=True)
 
@@ -158,6 +159,7 @@ def main() -> None:
     # --- Concept re-mapping (Iteration 5: name grounding) ---
     # After search, ask the LLM to re-map generated concept names to actual
     # Mathlib declaration names observed in the search results.
+    remap_log: list[dict[str, str]] = []
     if not args.dry_run and not args.skip_remap:
         remapped_concepts, remap_log = remap_concepts(
             concepts, responses, model=args.model
@@ -173,6 +175,23 @@ def main() -> None:
         concepts_for_verification = remapped_concepts
     else:
         concepts_for_verification = concepts
+
+    # --- Concept rewriting (Iteration 6: sibling-evidence propagation) ---
+    # For concepts the remapper left unchanged (null), check if a sibling
+    # concept was successfully remapped. If so, ask the LLM to rewrite
+    # the stranded concept using the sibling's Mathlib namespace as evidence.
+    if not args.dry_run and not args.skip_remap and remap_log:
+        rewritten_concepts, rewrite_log = rewrite_concepts(
+            concepts_for_verification, remap_log, responses, model=args.model
+        )
+        if rewrite_log:
+            rewrite_path = run_dir / "concepts_rewritten.json"
+            with rewrite_path.open("w", encoding="utf-8") as handle:
+                json.dump(rewritten_concepts, handle, ensure_ascii=True, indent=2)
+            rewrite_log_path = run_dir / "rewrite_log.json"
+            with rewrite_log_path.open("w", encoding="utf-8") as handle:
+                json.dump(rewrite_log, handle, ensure_ascii=True, indent=2)
+            concepts_for_verification = rewritten_concepts
 
     # --- Per-concept verification (pass 1: theme-level) ---
     verification_report = verify_concepts(concepts_for_verification, responses)

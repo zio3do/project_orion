@@ -1,4 +1,4 @@
 import ProjectOrion
 
 def main : IO Unit :=
-  IO.println s!"Hello, {hello}!"
+  IO.println "Project Orion — Graded Order Combinatorics library loaded."

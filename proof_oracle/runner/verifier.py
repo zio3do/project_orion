@@ -142,10 +142,61 @@ def _check_sorry_in_output(output: str) -> bool:
     return any(indicator.lower() in output_lower for indicator in sorry_indicators)
 
 
+def _check_lemma_present(lean_file: Path, lemma_name: str) -> bool:
+    """
+    Check that the target lemma/theorem/definition is actually declared in the file.
+
+    Prevents false positives: when the Oracle fails silently (e.g., credit
+    exhaustion), the file is unchanged, existing content still compiles, and
+    the verifier would pass without this check. By requiring the target name
+    to appear as a declaration, we catch this class of bugs.
+
+    Looks for patterns like:
+      theorem lemma_name
+      lemma lemma_name
+      def lemma_name
+      noncomputable def lemma_name
+      etc.
+    """
+    try:
+        content = lean_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+
+    # Match the lemma name after common Lean declaration keywords.
+    # Allow optional modifiers (private, protected, noncomputable, etc.)
+    pattern = re.compile(
+        r"^\s*(?:private\s+|protected\s+|noncomputable\s+)*"
+        r"(?:theorem|lemma|def|abbrev)\s+"
+        + re.escape(lemma_name)
+        + r"[\s\[\({:.]",
+        re.MULTILINE,
+    )
+
+    for match in pattern.finditer(content):
+        # Verify match is not inside a comment
+        line_start = content.rfind("\n", 0, match.start()) + 1
+        line_prefix = content[line_start : match.start()]
+        if "--" in line_prefix:
+            continue
+
+        before = content[: match.start()]
+        open_comments = len(re.findall(r"/-", before)) - len(
+            re.findall(r"-/", before)
+        )
+        if open_comments > 0:
+            continue
+
+        return True
+
+    return False
+
+
 def verify(
     lean_file: Path,
     project_root: Path,
     timeout: int = VERIFICATION_TIMEOUT_SECONDS,
+    lemma_name: str | None = None,
 ) -> VerificationResult:
     """
     Run the verification gate on a Lean file.
@@ -155,12 +206,15 @@ def verify(
       2. Parse stderr for compiler errors.
       3. Check for sorry usage in compiler output.
       4. Scan the source file for axiom declarations.
-      5. Return pass/fail with details.
+      5. If lemma_name is provided, check that it appears as a declaration.
+      6. Return pass/fail with details.
 
     Args:
         lean_file: Path to the .lean file (relative to project_root or absolute).
         project_root: Path to the Lean project root (contains lakefile.toml).
         timeout: Maximum seconds to wait for compilation.
+        lemma_name: If provided, verify that this name appears as a theorem/lemma/def
+                    in the file. Prevents false positives from silent Oracle failures.
 
     Returns:
         VerificationResult with pass/fail status and details.
@@ -212,6 +266,19 @@ def verify(
     has_axiom = _scan_for_axiom_declarations(absolute_lean_file)
 
     passed = len(errors) == 0 and not has_sorry and not has_axiom
+
+    # Lemma-presence check: if a target lemma name was provided, verify it
+    # actually appears as a declaration in the file. This catches false
+    # positives where the Oracle failed silently and the file was unchanged.
+    lemma_missing = False
+    if passed and lemma_name:
+        if not _check_lemma_present(absolute_lean_file, lemma_name):
+            passed = False
+            lemma_missing = True
+            errors.append(
+                f"Lemma presence check failed: '{lemma_name}' not found as a "
+                f"theorem/lemma/def declaration in {lean_file}"
+            )
 
     return VerificationResult(
         passed=passed,

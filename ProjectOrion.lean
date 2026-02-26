@@ -1,3 +1,5 @@
 -- This module serves as the root of the `ProjectOrion` library.
--- Import modules here that should be built as part of the library.
-import ProjectOrion.Basic
+-- Graded Order Combinatorics — verified Lean 4 library produced by Library Weaver.
+import Orion.GradedOrderCombinatorics.LevelSets
+import Orion.GradedOrderCombinatorics.RankGenPoly
+import Orion.GradedOrderCombinatorics.SaturatedChains

@@ -90,6 +90,25 @@ def build_prompt(
     system_prompt = _load_template(prompts_dir, "system_prompt.md")
     task_template = _load_template(prompts_dir, "task_template.md")
 
+    # Load theme-specific guide if available.
+    # Convention: theme guides are named theme_<slug>.md where the slug is
+    # derived from the target_namespace by:
+    #   1. Removing the "Orion." prefix (if present)
+    #   2. Inserting underscores before uppercase letters (CamelCase → snake_case)
+    #   3. Lowercasing everything
+    # Example: Orion.GradedOrderCombinatorics → theme_graded_order_combinatorics.md
+    theme_guide = ""
+    if spec.target_namespace:
+        import re
+        ns = spec.target_namespace
+        # Remove "Orion." prefix
+        if ns.startswith("Orion."):
+            ns = ns[len("Orion."):]
+        # CamelCase → snake_case (insert _ before uppercase runs)
+        ns_slug = re.sub(r"(?<=[a-z0-9])([A-Z])", r"_\1", ns)
+        ns_slug = ns_slug.replace(".", "_").lower()
+        theme_guide = _load_template(prompts_dir, f"theme_{ns_slug}.md")
+
     # Build the task-specific section
     sections = []
 
@@ -174,10 +193,15 @@ def build_prompt(
 
     task_section = "\n".join(sections)
 
-    # Assemble the final prompt: system prompt + task template + task specifics
+    # Assemble the final prompt: system prompt + theme guide + task template + task specifics
     parts = []
     if system_prompt:
         parts.append(system_prompt.strip())
+        parts.append("")
+        parts.append("---")
+        parts.append("")
+    if theme_guide:
+        parts.append(theme_guide.strip())
         parts.append("")
         parts.append("---")
         parts.append("")

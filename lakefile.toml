@@ -1,6 +1,6 @@
 name = "project_orion"
 version = "0.1.0"
-defaultTargets = ["project_orion"]
+defaultTargets = ["ProjectOrion"]
 
 [[require]]
 name = "mathlib"
@@ -8,7 +8,3 @@ scope = "leanprover-community"
 
 [[lean_lib]]
 name = "ProjectOrion"
-
-[[lean_exe]]
-name = "project_orion"
-root = "Main"

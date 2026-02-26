@@ -28,7 +28,7 @@ from pathlib import Path
 from .manifest import LemmaEntry, Manifest
 from .pre_search import PreSearchResult, run_pre_search
 from .prompt_builder import LemmaSpec, build_prompt
-from .session import run_session
+from .session import SessionResult, run_session
 from .verifier import verify
 
 logger = logging.getLogger(__name__)
@@ -38,6 +38,40 @@ PROOF_ORACLE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = PROOF_ORACLE_DIR.parent
 PROMPTS_DIR = PROOF_ORACLE_DIR / "prompts"
 RUNS_DIR = PROOF_ORACLE_DIR / "runs"
+
+
+class CreditExhaustedError(RuntimeError):
+    """Raised when the Claude API credit balance is exhausted.
+
+    This is an infrastructure error, not a proof failure. When raised from
+    ``run_lemma``, the caller (Library Weaver) should halt the entire run
+    rather than attempting subsequent entries — they will all fail the same
+    way, wasting budget and wall-clock time.
+    """
+
+
+# Phrases indicating Claude API credit exhaustion in session output.
+# When detected, retrying is pointless — all subsequent attempts will fail.
+_CREDIT_EXHAUSTION_PHRASES = [
+    "credit balance is too low",
+    "insufficient_credits",
+    "billing_error",
+]
+
+
+def _is_credit_exhausted(session_result: SessionResult) -> bool:
+    """
+    Check if a Claude Code session failed due to API credit exhaustion.
+
+    Detects the "Credit balance is too low" message that Claude CLI returns
+    when the account has insufficient credits. This check inspects both stdout
+    and stderr since the error can appear in either stream depending on how
+    far the session progressed before credits ran out.
+
+    Returns True if credit exhaustion is detected.
+    """
+    combined = (session_result.raw_output + session_result.raw_stderr).lower()
+    return any(phrase in combined for phrase in _CREDIT_EXHAUSTION_PHRASES)
 
 
 def _load_lemma_spec(spec_path: Path) -> LemmaSpec:
@@ -219,11 +253,32 @@ def run_lemma(
             previous_errors = session_result.raw_stderr
             continue
 
+        # Check for credit exhaustion — abort immediately, no retry
+        if _is_credit_exhausted(session_result):
+            logger.error(
+                "Claude API credit balance exhausted. "
+                "Aborting proof loop — retrying would waste budget."
+            )
+            entry.status = "failed"
+            entry.attempts_used = attempt
+            entry.notes = (
+                f"Credit balance exhausted on attempt {attempt}. "
+                f"No further attempts possible until credits are replenished."
+            )
+            entry.errors = "Credit balance is too low"
+            manifest.upsert_entry(entry)
+            manifest.write()
+            raise CreditExhaustedError(
+                f"Claude API credits exhausted during {spec.lemma_name} "
+                f"(attempt {attempt}/{spec.attempt_budget}). "
+                f"Replenish credits before retrying."
+            )
+
         # Run verification gate
         lean_file = Path(spec.target_file)
         logger.info("Running verification gate on %s", lean_file)
 
-        verification = verify(lean_file, project_root)
+        verification = verify(lean_file, project_root, lemma_name=spec.lemma_name)
         logger.info("Verification: %s", verification.summary())
 
         if verification.passed:

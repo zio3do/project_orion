@@ -7,4 +7,7 @@ name = "mathlib"
 scope = "leanprover-community"
 
 [[lean_lib]]
+name = "Orion"
+
+[[lean_lib]]
 name = "ProjectOrion"

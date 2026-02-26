@@ -209,7 +209,6 @@ def _run_grounded_pipeline(
     # Stage 3: Full grounding of expanded items.
     if not skip_grounding:
         print("[4/4] Re-grounding expanded decomposition...")
-        from library_architect.grounder import ground
         grounded = ground(decomposition, use_cache=use_cache)
         novel = sum(
             1 for d in grounded.definitions if d.grounding.status == "novel"

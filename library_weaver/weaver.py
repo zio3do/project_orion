@@ -281,7 +281,6 @@ def weave(
     # 7. Finalize
     # ------------------------------------------------------------------
     result.finished = datetime.now(timezone.utc).isoformat()
-    total_time = time.time() - time.time()  # will be set properly below
 
     if result.started:
         start_dt = datetime.fromisoformat(result.started)
